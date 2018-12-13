@@ -20,6 +20,7 @@ namespace Csla.Test.BasicModern
   public class BasicModernTests
   {
     [TestMethod]
+    
     public void CreateGraph()
     {
       var graph = Root.NewRoot();

@@ -216,6 +216,7 @@ namespace Csla.Test.ValidationRules
     }
 
     [TestMethod()]
+    
     public void BreakRequiredRule()
     {
       Csla.ApplicationContext.GlobalContext.Clear();
@@ -238,6 +239,7 @@ namespace Csla.Test.ValidationRules
     }
 
     [TestMethod()]
+    
     public void BreakLengthRule()
     {
       Csla.ApplicationContext.GlobalContext.Clear();
@@ -260,6 +262,7 @@ namespace Csla.Test.ValidationRules
     }
 
     [TestMethod()]
+    
     public void BreakLengthRuleAndClone()
     {
       Csla.ApplicationContext.GlobalContext.Clear();

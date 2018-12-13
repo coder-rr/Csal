@@ -47,6 +47,7 @@ namespace Csla.Test.Silverlight.Security
     }
 
     [TestMethod]
+    
     public void SetCSLAPrincipalLocal()
     {
       SilverlightPrincipal.Logout();

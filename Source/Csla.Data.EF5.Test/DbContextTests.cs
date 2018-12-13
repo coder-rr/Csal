@@ -39,6 +39,7 @@ namespace Csla.Data.EF5.Test
 #if DEBUG
         [TestMethod]
         [ExpectedException(typeof(EntityException))]
+        
         public void ConnectionSetting_with_Invalid_DB_Throws_ConfigurationErrorsException_for_DbContextDataContext()
         {
             var conn = ConfigurationManager.ConnectionStrings[EntityConnectionWithMissingDB].ConnectionString;
@@ -59,6 +60,7 @@ namespace Csla.Data.EF5.Test
         }
 
         [TestMethod]
+        
         public void Table2_retreived_through_DbContextDataContext_has_records()
         {
             using (var dbContextManager = DbContextManager<DataPortalDbContext>.GetManager())

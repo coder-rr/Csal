@@ -232,6 +232,7 @@ namespace Csla.Test.Serialization
     }
 
     [TestMethod()]
+    [TestCategory("SkipWhenLiveUnitTesting")]
     public void TestValidationRulesAfterSerialization()
     {
       UnitTestContext context = GetContext();
@@ -450,6 +451,7 @@ namespace Csla.Test.Serialization
     }
 
     [TestMethod]
+    [TestCategory("SkipWhenLiveUnitTesting")]
     public void DCClone()
     {
       System.Configuration.ConfigurationManager.AppSettings["CslaSerializationFormatter"] =
@@ -470,6 +472,7 @@ namespace Csla.Test.Serialization
     }
 
     [TestMethod]
+    
     public void DCEditLevels()
     {
       System.Configuration.ConfigurationManager.AppSettings["CslaSerializationFormatter"] =
@@ -511,6 +514,7 @@ namespace Csla.Test.Serialization
     }
 
     [TestMethod]
+    
     public void SerializeCommand()
     {
       var cmd = new TestCommand();
@@ -535,6 +539,7 @@ namespace Csla.Test.Serialization
     }
 
     [TestMethod]
+    [TestCategory("SkipWhenLiveUnitTesting")]
     public void CommandOverDataPortal()
     {
       Csla.ApplicationContext.DataPortalProxy = "Csla.Testing.Business.TestProxies.AppDomainProxy, Csla.Testing.Business";

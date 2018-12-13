@@ -30,8 +30,15 @@ namespace Csla
     internal static void SettingsChanged()
     {
       _dataPortalReturnObjectOnExceptionSet = false;
+      _propertyChangedModeSet = false;
       _transactionIsolationLevelSet = false;
       _defaultTransactionTimeoutInSecondsSet = false;
+      _authenticationTypeName = null;
+      _dataPortalActivator = null;
+      _dataPortalUrl = null;
+      _dataPortalProxyFactory = null;
+      _dataPortalProxy = null;
+      _VersionRoutingTag = null;
     }
 
   private static IContextManager _webContextManager;
@@ -242,6 +249,18 @@ namespace Csla
     #region Settings
 
     /// <summary>
+    /// Gets or sets a value indicating whether the app
+    /// should be considered "offline".
+    /// </summary>
+    /// <remarks>
+    /// If this value is true then the client-side data 
+    /// portal will direct all calls to the local
+    /// data portal. No calls will flow to remote
+    /// data portal endpoints.
+    /// </remarks>
+    public static bool IsOffline { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether CSLA
     /// should fallback to using reflection instead of
     /// System.Linq.Expressions (true, default).
@@ -308,6 +327,29 @@ namespace Csla
       }
     }
 
+    private static string _VersionRoutingTag = null;
+
+    /// <summary>
+    /// Gets or sets a value representing the application version
+    /// for use in server-side data portal routing.
+    /// </summary>
+    public static string VersionRoutingTag
+    {
+      get
+      {
+        if (string.IsNullOrWhiteSpace(_VersionRoutingTag))
+          _VersionRoutingTag = ConfigurationManager.AppSettings["CslaVersionRoutingTag"];
+        return _VersionRoutingTag;
+      }
+      internal set
+      {
+        if (!string.IsNullOrWhiteSpace(value))
+          if (value.Contains("-") || value.Contains("/"))
+            throw new ArgumentException("valueRoutingToken");
+        _VersionRoutingTag = value;
+      }
+    }
+
     /// <summary>
     /// Returns the URL for the DataPortal server.
     /// </summary>
@@ -363,7 +405,7 @@ namespace Csla
       }
     }
 
-    private static string _authenticationType;
+    private static string _authenticationTypeName;
 
     /// <summary>
     /// Returns the authentication type being used by the
@@ -382,13 +424,13 @@ namespace Csla
     {
       get
       {
-        if (_authenticationType == null)
-          _authenticationType = ConfigurationManager.AppSettings["CslaAuthentication"];
-        if (_authenticationType == null)
-          _authenticationType = "Csla";
-        return _authenticationType; 
+        if (string.IsNullOrWhiteSpace(_authenticationTypeName))
+          _authenticationTypeName = ConfigurationManager.AppSettings["CslaAuthentication"];
+        if (string.IsNullOrWhiteSpace(_authenticationTypeName))
+          _authenticationTypeName = "Csla";
+        return _authenticationTypeName; 
       }
-      set { _authenticationType = value; }
+      set { _authenticationTypeName = value; }
     }
 
     private static string _dataPortalProxy;
@@ -487,11 +529,9 @@ namespace Csla
       {
         if (!_dataPortalReturnObjectOnExceptionSet)
         {
-#if !ANDROID && !IOS && !NETFX_CORE && !NETSTANDARD2_0
           string setting = ConfigurationManager.AppSettings["CslaDataPortalReturnObjectOnException"];
           if (!string.IsNullOrEmpty(setting))
             DataPortalReturnObjectOnException = bool.Parse(setting);
-#endif
           _dataPortalReturnObjectOnExceptionSet = true;
         }
         return _dataPortalReturnObjectOnException;

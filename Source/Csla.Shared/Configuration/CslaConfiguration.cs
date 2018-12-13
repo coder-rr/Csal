@@ -1,4 +1,11 @@
-﻿using Csla.Core;
+﻿//-----------------------------------------------------------------------
+// <copyright file="CslaConfiguration.cs" company="Marimer LLC">
+//     Copyright (c) Marimer LLC. All rights reserved.
+//     Website: http://www.lhotka.net/cslanet/
+// </copyright>
+// <summary>Use this type to configure the settings for CSLA .NET</summary>
+//-----------------------------------------------------------------------
+using Csla.Core;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,17 +17,6 @@ namespace Csla.Configuration
   /// </summary>
   public class CslaConfiguration : ICslaConfiguration
   {
-    /// <summary>
-    /// Creates a new instance of the type.
-    /// </summary>
-    public CslaConfiguration()
-    {
-      DataPortal = new CslaDataPortalConfiguration(this);
-      Data = new CslaDataConfiguration(this);
-      Security = new CslaSecurityConfiguration(this);
-      Serialization = new CslaSerializationConfiguration(this);
-    }
-
 #if !NETSTANDARD2_0
     /// <summary>
     /// Sets the web context manager.
@@ -31,7 +27,7 @@ namespace Csla.Configuration
     /// Only need to set for non-default WebContextManager.
     /// </remarks>
     /// <returns></returns>
-    public CslaConfiguration WebContextManager(IContextManager contextManager)
+    public ICslaConfiguration WebContextManager(IContextManager contextManager)
     {
       ApplicationContext.WebContextManager = contextManager;
       return this;
@@ -39,32 +35,12 @@ namespace Csla.Configuration
 #endif
 
     /// <summary>
-    /// Gets a reference to the data portal configuration object.
-    /// </summary>
-    public CslaDataPortalConfiguration DataPortal { get; private set; }
-
-    /// <summary>
-    /// Gets a reference to the data configuration object.
-    /// </summary>
-    public CslaDataConfiguration Data { get; private set; }
-
-    /// <summary>
-    /// Gets a reference to the data configuration object.
-    /// </summary>
-    public CslaSecurityConfiguration Security { get; private set; }
-
-    /// <summary>
-    /// Gets a reference to the data configuration object.
-    /// </summary>
-    public CslaSerializationConfiguration Serialization { get; private set; }
-
-    /// <summary>
     /// Sets a value indicating whether CSLA
     /// should fallback to using reflection instead of
     /// System.Linq.Expressions (true, default).
     /// </summary>
     /// <param name="value">Value</param>
-    public CslaConfiguration UseReflectionFallback(bool value)
+    public ICslaConfiguration UseReflectionFallback(bool value)
     {
       ApplicationContext.UseReflectionFallback = value;
       return this;
@@ -75,9 +51,33 @@ namespace Csla.Configuration
     /// raise PropertyChanged events.
     /// </summary>
     /// <param name="mode">Property changed mode</param>
-    public CslaConfiguration PropertyChangedMode(ApplicationContext.PropertyChangedModes mode)
+    public ICslaConfiguration PropertyChangedMode(ApplicationContext.PropertyChangedModes mode)
     {
-      ApplicationContext.PropertyChangedMode = mode;
+      ConfigurationManager.AppSettings["CslaPropertyChangedMode"] = mode.ToString();
+      return this;
+    }
+
+    /// <summary>
+    /// Sets a value representing the application version
+    /// for use in server-side data portal routing.
+    /// </summary>
+    /// <param name="version">
+    /// Application version used to create data portal
+    /// routing tag (can not contain '-').
+    /// </param>
+    /// <remarks>
+    /// If this value is set then you must use the
+    /// .NET Core server-side Http data portal endpoint
+    /// as a router so the request can be routed to
+    /// another app server that is running the correct
+    /// version of the application's assemblies.
+    /// </remarks>
+    public ICslaConfiguration VersionRoutingTag(string version)
+    {
+      if (!string.IsNullOrWhiteSpace(version))
+        if (version.Contains("-") || version.Contains("/"))
+          throw new ArgumentException("VersionRoutingTag");
+      ConfigurationManager.AppSettings["CslaVersionRoutingTag"] = version;
       return this;
     }
 
@@ -85,7 +85,7 @@ namespace Csla.Configuration
     /// Sets the RuleSet name to use for static HasPermission calls.
     /// </summary>
     /// <param name="ruleSet">The rule set.</param>
-    public CslaConfiguration RuleSet(string ruleSet)
+    public ICslaConfiguration RuleSet(string ruleSet)
     {
       ApplicationContext.RuleSet = ruleSet;
       return this;
@@ -95,9 +95,21 @@ namespace Csla.Configuration
     /// Sets the factory type that creates PropertyInfo objects.
     /// </summary>
     /// <param name="typeName">Factory type name</param>
-    public CslaConfiguration PropertyInfoFactory(string typeName)
+    public ICslaConfiguration PropertyInfoFactory(string typeName)
     {
       ConfigurationManager.AppSettings["CslaPropertyInfoFactory"] = typeName;
+      return this;
+    }
+
+    /// <summary>
+    /// Resets any ApplicationContext settings so they 
+    /// re-read their configuration from AppSettings
+    /// on next use.
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public ICslaConfiguration SettingsChanged()
+    {
+      ApplicationContext.SettingsChanged();
       return this;
     }
   }

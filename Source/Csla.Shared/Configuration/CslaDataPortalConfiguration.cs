@@ -1,32 +1,64 @@
-﻿using System;
+﻿//-----------------------------------------------------------------------
+// <copyright file="CslaDataPortalConfiguration.cs" company="Marimer LLC">
+//     Copyright (c) Marimer LLC. All rights reserved.
+//     Website: http://www.lhotka.net/cslanet/
+// </copyright>
+// <summary>Use this type to configure the settings for CSLA .NET</summary>
+//-----------------------------------------------------------------------
+using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Csla.Configuration
 {
+  /// <summary>
+  /// Extension method for CslaDataPortalConfiguration
+  /// </summary>
+  public static class CslaDataPortalConfigurationExtension
+  {
+    /// <summary>
+    /// Extension method for CslaDataPortalConfiguration
+    /// </summary>
+    public static CslaDataPortalConfiguration DataPortal(this ICslaConfiguration config)
+    {
+      return new CslaDataPortalConfiguration(config);
+    }
+  }
+
   /// <summary>
   /// Use this type to configure the settings for the
   /// CSLA .NET data portal.
   /// </summary>
   public class CslaDataPortalConfiguration
   {
-    private CslaConfiguration RootConfiguration { get; set; }
+    private ICslaConfiguration RootConfiguration { get; set; }
 
-    internal CslaDataPortalConfiguration(CslaConfiguration root)
+    internal CslaDataPortalConfiguration(ICslaConfiguration root)
     {
       RootConfiguration = root;
     }
 
     /// <summary>
-    /// Configure the default data portal proxy and URL.
+    /// Configure the default data portal proxy type and URL.
     /// </summary>
-    /// <param name="proxyTypeName">Default proxy type name</param>
+    /// <param name="type">Type of data portal proxy</param>
     /// <param name="defaultUrl">Default server URL</param>
     /// <returns></returns>
-    public CslaConfiguration DefaultDataPortalProxy(string proxyTypeName, string defaultUrl)
+    public ICslaConfiguration DefaultProxy(Type type, string defaultUrl)
     {
-      ApplicationContext.DataPortalProxy = proxyTypeName;
-      ApplicationContext.DataPortalUrlString = defaultUrl;
+      DefaultProxy(type.AssemblyQualifiedName, defaultUrl);
+      return RootConfiguration;
+    }
+
+    /// <summary>
+    /// Configure the default data portal proxy type and URL.
+    /// </summary>
+    /// <param name="typeName">Assembly qualified type name</param>
+    /// <param name="defaultUrl">Default server URL</param>
+    /// <returns></returns>
+    public ICslaConfiguration DefaultProxy(string typeName, string defaultUrl)
+    {
+      ConfigurationManager.AppSettings["CslaDataPortalProxy"] = typeName;
+      ConfigurationManager.AppSettings["CslaDataPortalUrl"] = defaultUrl;
       return RootConfiguration;
     }
 
@@ -36,7 +68,7 @@ namespace Csla.Configuration
     /// </summary>
     /// <param name="descriptors">Data portal type/resource to proxy mapping</param>
     /// <returns></returns>
-    public CslaConfiguration DataPortalProxyDescriptors(List<Tuple<string, string, string>> descriptors)
+    public ICslaConfiguration ProxyDescriptors(List<Tuple<string, string, string>> descriptors)
     {
       DataPortalClient.DataPortalProxyFactory.DataPortalTypeProxyDescriptors?.Clear();
 
@@ -72,17 +104,28 @@ namespace Csla.Configuration
     /// the DataPortalProxy instance to use when
     /// communicating with the data portal server.
     /// </summary>
-    public CslaConfiguration DataPortalProxyFactory(string factoryTypeName)
+    /// <param name="typeName">Assembly qualified type name</param>
+    public ICslaConfiguration ProxyFactoryType(string typeName)
     {
-      ApplicationContext.DataPortalProxyFactory = factoryTypeName;
+      ConfigurationManager.AppSettings["CslaDataPortalProxyFactory"] = typeName;
+      return RootConfiguration;
+    }
+
+    /// <summary>
+    /// Sets the type of the IDataPortalActivator provider.
+    /// </summary>
+    /// <param name="typeName">Assembly qualified type name</param>
+    public ICslaConfiguration ActivatorType(string typeName)
+    {
+      ConfigurationManager.AppSettings["CslaDataPortalActivator"] = typeName;
       return RootConfiguration;
     }
 
     /// <summary>
     /// Sets an instance of the IDataPortalActivator provider.
     /// </summary>
-    /// <param name="activator">Instance of activator</param>
-    public CslaConfiguration DataPortalActivator(Csla.Server.IDataPortalActivator activator)
+    /// <param name="activator">Activator instance</param>
+    public ICslaConfiguration Activator(Server.IDataPortalActivator activator)
     {
       ApplicationContext.DataPortalActivator = activator;
       return RootConfiguration;
@@ -92,10 +135,10 @@ namespace Csla.Configuration
     /// Sets the authentication type being used by the
     /// CSLA .NET framework.
     /// </summary>
-    /// <param name="type">Authentication type value (defaults to 'Csla')</param>
-    public CslaConfiguration AuthenticationType(string type)
+    /// <param name="typeName">Authentication type value (defaults to 'Csla')</param>
+    public ICslaConfiguration AuthenticationType(string typeName)
     {
-      ApplicationContext.AuthenticationType = type;
+      ConfigurationManager.AppSettings["CslaAuthentication"] = typeName;
       return RootConfiguration;
     }
 
@@ -104,7 +147,7 @@ namespace Csla.Configuration
     /// authorization. Type must implement IAuthorizeDataPortal.
     /// </summary>
     /// <param name="typeName">Assembly qualified type name</param>
-    public CslaConfiguration ServerAuthorizationProvider(string typeName)
+    public ICslaConfiguration ServerAuthorizationProviderType(string typeName)
     {
       ConfigurationManager.AppSettings["CslaAuthorizationProvider"] = typeName;
       return RootConfiguration;
@@ -117,7 +160,7 @@ namespace Csla.Configuration
     /// IInterceptDataPortal.
     /// </summary>
     /// <param name="typeName">Assembly qualified type name</param>
-    public CslaConfiguration InterceptorType(string typeName)
+    public ICslaConfiguration InterceptorType(string typeName)
     {
       ConfigurationManager.AppSettings["CslaDataPortalInterceptor"] = typeName;
       return RootConfiguration;
@@ -128,9 +171,9 @@ namespace Csla.Configuration
     /// Type must implement IDataPortalExceptionInspector.
     /// </summary>
     /// <param name="typeName">Assembly qualified type name</param>
-    public CslaConfiguration ExceptionInspectorType(string typeName)
+    public ICslaConfiguration ExceptionInspectorType(string typeName)
     {
-      Csla.Server.DataPortalExceptionHandler.ExceptionInspector = typeName;
+      ConfigurationManager.AppSettings["CslaDataPortalExceptionInspector"] = typeName;
       return RootConfiguration;
     }
 
@@ -141,7 +184,7 @@ namespace Csla.Configuration
     /// IObjectFactoryLoader.
     /// </summary>
     /// <param name="typeName">Assembly qualified type name</param>
-    public CslaConfiguration FactoryLoaderType(string typeName)
+    public ICslaConfiguration FactoryLoaderType(string typeName)
     {
       ConfigurationManager.AppSettings["CslaObjectFactoryLoader"] = typeName;
       return RootConfiguration;
@@ -153,7 +196,7 @@ namespace Csla.Configuration
     /// method when using a local data portal configuration.
     /// </summary>
     /// <param name="value">Value (defaults to true)</param>
-    public CslaConfiguration AutoCloneOnUpdate(bool value)
+    public ICslaConfiguration AutoCloneOnUpdate(bool value)
     {
       ConfigurationManager.AppSettings["CslaAutoCloneOnUpdate"] = value.ToString();
       return RootConfiguration;
@@ -165,9 +208,22 @@ namespace Csla.Configuration
     /// the client as part of the DataPortalException.
     /// </summary>
     /// <param name="value">Value (default is false)</param>
-    public CslaConfiguration DataPortalReturnObjectOnException(bool value)
+    public ICslaConfiguration DataPortalReturnObjectOnException(bool value)
     {
-      ApplicationContext.DataPortalReturnObjectOnException = value;
+      ConfigurationManager.AppSettings["CslaDataPortalReturnObjectOnException"] = value.ToString();
+      return RootConfiguration;
+    }
+
+    /// <summary>
+    /// Sets the assembly qualified type name of the dashboard, or
+    /// 'Dashboard' for default, or 'NullDashboard' for the null dashboard.
+    /// </summary>
+    /// <param name="typeName">Assembly qualified type name</param>
+    /// <returns></returns>
+    public ICslaConfiguration DashboardType(string typeName)
+    {
+      ConfigurationManager.AppSettings["CslaDashboardType"] = typeName;
+      Csla.Server.Dashboard.DashboardFactory.Reset();
       return RootConfiguration;
     }
   }
