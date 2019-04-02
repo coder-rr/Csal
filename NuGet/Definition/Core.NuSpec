@@ -6,7 +6,7 @@
     <tags>CSLA Business Core</tags>
     <version>4.6.3-Beta2</version>
     <authors>Marimer LLC</authors>
-    <licenseUrl>https://github.com/MarimerLLC/csla/blob/master/license.md</licenseUrl>
+    <license type="expression">MIT</license>
     <projectUrl>https://cslanet.com/</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/MarimerLLC/csla/master/Support/Logos/csla.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -40,6 +40,11 @@ Supports the creation of Class Library projects containing business domain class
         <dependency id="System.Runtime.Serialization.Formatters" version="4.3.0" />
         <dependency id="System.Data.Common" version="4.3.0" />
         <dependency id="System.Data.SqlClient" version="4.4.3" />
+        <dependency id="System.Buffers" version="4.5.0" />
+        <dependency id="Microsoft.Extensions.Configuration" version="2.1.1" />
+        <dependency id="Microsoft.Extensions.Configuration.Binder" version="2.1.1" />
+        <dependency id="Microsoft.Extensions.DependencyInjection" version="2.1.1" />
+        <dependency id="Microsoft.Extensions.DependencyInjection.Abstractions" version="2.1.1" />
       </group>
     </dependencies>
   </metadata>
