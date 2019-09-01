@@ -1,12 +1,13 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="DataPortalT.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Client side data portal used for making asynchronous</summary>
 //-----------------------------------------------------------------------
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Csla.Properties;
@@ -22,8 +23,6 @@ namespace Csla
   /// </typeparam>
   public class DataPortal<T> : IDataPortal<T>
   {
-    internal static Csla.Server.EmptyCriteria EmptyCriteria = new Server.EmptyCriteria();
-
     /// <summary>
     /// Gets a reference to the global context returned from
     /// the background thread and/or server.
@@ -69,14 +68,6 @@ namespace Csla
       }
     }
 
-    private void SetThreadContext(DataPortalAsyncRequest request)
-    {
-      Csla.ApplicationContext.User = request.Principal;
-      Csla.ApplicationContext.SetContext(request.ClientContext, request.GlobalContext);
-      Thread.CurrentThread.CurrentCulture = request.CurrentCulture;
-      Thread.CurrentThread.CurrentUICulture = request.CurrentUICulture;
-    }
-
     private async Task<object> DoCreateAsync(Type objectType, object criteria, bool isSync)
     {
       Server.DataPortalResult result = null;
@@ -85,16 +76,18 @@ namespace Csla
       {
         DataPortal.OnDataPortalInitInvoke(null);
 
-        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.CreateObject, objectType))
+        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.CreateObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
           throw new Csla.Security.SecurityException(string.Format(
             Resources.UserNotAuthorizedException,
             "create",
             objectType.Name));
-
+#if NET40
         var method = Server.DataPortalMethodCache.GetCreateMethod(objectType, criteria);
-
-        DataPortalClient.IDataPortalProxy proxy;
-        proxy = GetDataPortalProxy(objectType, method.RunLocal);
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal);
+#else
+        var method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<CreateAttribute>(objectType, Server.DataPortal.GetCriteriaArray(criteria));
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal());
+#endif
 
         dpContext =
           new Csla.Server.DataPortalContext(GetPrincipal(), proxy.IsServerRemote);
@@ -112,8 +105,7 @@ namespace Csla
         {
           if (ex.InnerExceptions.Count > 0)
           {
-            var dpe = ex.InnerExceptions[0] as Server.DataPortalException;
-            if (dpe != null)
+            if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleCreateDataPortalException(dpe, isSync, proxy);
           }
           throw new DataPortalException(
@@ -144,22 +136,11 @@ namespace Csla
     /// a new object, which is loaded with default
     /// values from the database.
     /// </summary>
-    /// <returns>A new object, populated with default values.</returns>
-    public T Create()
-    {
-      return Create(EmptyCriteria);
-    }
-
-    /// <summary>
-    /// Called by a factory method in a business class to create 
-    /// a new object, which is loaded with default
-    /// values from the database.
-    /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
     /// <returns>A new object, populated with default values.</returns>
-    public T Create(object criteria)
+    public T Create(params object[] criteria)
     {
-      return (T)Create(typeof(T), criteria);
+      return (T)Create(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria));
     }
 
     internal static object Create(Type objectType, object criteria)
@@ -183,20 +164,10 @@ namespace Csla
     /// by the UI to create a new object, which is loaded 
     /// with default values from the database.
     /// </summary>
-    public async Task<T> CreateAsync()
-    {
-      return await CreateAsync(EmptyCriteria);
-    }
-
-    /// <summary>
-    /// Called by a factory method in a business class or
-    /// by the UI to create a new object, which is loaded 
-    /// with default values from the database.
-    /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
-    public async Task<T> CreateAsync(object criteria)
+    public async Task<T> CreateAsync(params object[] criteria)
     {
-      return (T)await DoCreateAsync(typeof(T), criteria, false);
+      return (T)await DoCreateAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
     /// <summary>
@@ -217,6 +188,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     public event EventHandler<DataPortalResult<T>> CreateCompleted;
 
     /// <summary>
@@ -240,6 +212,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     protected virtual void OnCreateCompleted(DataPortalResult<T> e)
     {
       CreateCompleted?.Invoke(this, e);
@@ -250,9 +223,10 @@ namespace Csla
     /// by the UI to create a new object, which is loaded 
     /// with default values from the database.
     /// </summary>
+    [Obsolete]
     public void BeginCreate()
     {
-      BeginCreate(EmptyCriteria);
+      BeginCreate(Server.EmptyCriteria.Instance);
     }
 
     /// <summary>
@@ -261,6 +235,7 @@ namespace Csla
     /// with default values from the database.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
+    [Obsolete]
     public void BeginCreate(object criteria)
     {
       BeginCreate(criteria, null);
@@ -273,6 +248,7 @@ namespace Csla
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
     /// <param name="userState">User state data.</param>
+    [Obsolete]
     public async void BeginCreate(object criteria, object userState)
     {
       try
@@ -301,16 +277,19 @@ namespace Csla
       {
         DataPortal.OnDataPortalInitInvoke(null);
 
-        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.GetObject, objectType))
+        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.GetObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
           throw new Csla.Security.SecurityException(string.Format(
             Resources.UserNotAuthorizedException,
             "get",
             objectType.Name));
 
+#if NET40
         var method = Server.DataPortalMethodCache.GetFetchMethod(objectType, criteria);
-
-        DataPortalClient.IDataPortalProxy proxy;
-        proxy = GetDataPortalProxy(objectType, method.RunLocal);
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal);
+#else
+        var method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<FetchAttribute>(objectType, Server.DataPortal.GetCriteriaArray(criteria));
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal());
+#endif
 
         dpContext =
           new Csla.Server.DataPortalContext(GetPrincipal(), proxy.IsServerRemote);
@@ -373,6 +352,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     public event EventHandler<DataPortalResult<T>> FetchCompleted;
 
     /// <summary>
@@ -396,6 +376,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     protected virtual void OnFetchCompleted(DataPortalResult<T> e)
     {
       FetchCompleted?.Invoke(this, e);
@@ -406,22 +387,11 @@ namespace Csla
     /// a new object, which is loaded with default
     /// values from the database.
     /// </summary>
-    /// <returns>A new object, populated with default values.</returns>
-    public T Fetch()
-    {
-      return Fetch(EmptyCriteria);
-    }
-
-    /// <summary>
-    /// Called by a factory method in a business class to Fetch 
-    /// a new object, which is loaded with default
-    /// values from the database.
-    /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
     /// <returns>A new object, populated with default values.</returns>
-    public T Fetch(object criteria)
+    public T Fetch(params object[] criteria)
     {
-      return (T)Fetch(typeof(T), criteria);
+      return (T)Fetch(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria));
     }
 
     internal static object Fetch(Type objectType, object criteria)
@@ -445,20 +415,10 @@ namespace Csla
     /// by the UI to Fetch a new object, which is loaded 
     /// with default values from the database.
     /// </summary>
-    public async Task<T> FetchAsync()
-    {
-      return await FetchAsync(EmptyCriteria);
-    }
-
-    /// <summary>
-    /// Called by a factory method in a business class or
-    /// by the UI to Fetch a new object, which is loaded 
-    /// with default values from the database.
-    /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
-    public async Task<T> FetchAsync(object criteria)
+    public async Task<T> FetchAsync(params object[] criteria)
     {
-      return (T)await DoFetchAsync(typeof(T), criteria, false);
+      return (T)await DoFetchAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
     /// <summary>
@@ -466,9 +426,10 @@ namespace Csla
     /// by the UI to Fetch a new object, which is loaded 
     /// with default values from the database.
     /// </summary>
+    [Obsolete]
     public void BeginFetch()
     {
-      BeginFetch(EmptyCriteria);
+      BeginFetch(Server.EmptyCriteria.Instance);
     }
 
     /// <summary>
@@ -477,6 +438,7 @@ namespace Csla
     /// with default values from the database.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
+    [Obsolete]
     public void BeginFetch(object criteria)
     {
       BeginFetch(criteria, null);
@@ -489,6 +451,7 @@ namespace Csla
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
     /// <param name="userState">User state data.</param>
+    [Obsolete]
     public async void BeginFetch(object criteria, object userState)
     {
       try
@@ -518,10 +481,11 @@ namespace Csla
       try
       {
         DataPortal.OnDataPortalInitInvoke(null);
-        Csla.Server.DataPortalMethodInfo method = null;
+        DataPortalClient.IDataPortalProxy proxy = null;
         var factoryInfo = Csla.Server.ObjectFactoryAttribute.GetObjectFactoryAttribute(objectType);
         if (factoryInfo != null)
         {
+          Csla.Server.DataPortalMethodInfo method = null;
           var factoryType = Csla.Server.FactoryDataPortal.FactoryLoader.GetFactoryType(factoryInfo.FactoryTypeName);
 
           if (obj is Core.ICommandObject)
@@ -535,8 +499,7 @@ namespace Csla
           }
           else
           {
-            var bbase = obj as Core.BusinessBase;
-            if (bbase != null)
+            if (obj is Core.BusinessBase bbase)
             {
               if (bbase.IsDeleted)
               {
@@ -584,9 +547,12 @@ namespace Csla
           }
           if (method == null)
             method = new Csla.Server.DataPortalMethodInfo();
+          proxy = GetDataPortalProxy(objectType, method.RunLocal);
         }
+#if NET40
         else
         {
+          Csla.Server.DataPortalMethodInfo method = null;
           string methodName;
           if (obj is Core.ICommandObject)
           {
@@ -638,10 +604,59 @@ namespace Csla
             }
           }
           method = Server.DataPortalMethodCache.GetMethodInfo(obj.GetType(), methodName);
+          proxy = GetDataPortalProxy(objectType, method.RunLocal);
         }
-
-        DataPortalClient.IDataPortalProxy proxy;
-        proxy = GetDataPortalProxy(objectType, method.RunLocal);
+#else
+        else
+        {
+          System.Reflection.MethodInfo method;
+          var criteria = Server.DataPortal.GetCriteriaArray(Server.EmptyCriteria.Instance);
+          if (obj is Core.ICommandObject)
+          {
+            operation = DataPortalOperations.Execute;
+            if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.EditObject, obj))
+              throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
+                "execute",
+                objectType.Name));
+            method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<ExecuteAttribute>(objectType, criteria);
+          }
+          else
+          {
+            if (obj is Core.BusinessBase bbase)
+            {
+              if (bbase.IsDeleted)
+              {
+                if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.DeleteObject, obj))
+                  throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
+                    "delete",
+                    objectType.Name));
+                method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<DeleteSelfAttribute>(objectType, criteria);
+              }
+              else if (bbase.IsNew)
+              {
+                if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.CreateObject, obj))
+                  throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
+                    "create",
+                    objectType.Name));
+                method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<InsertAttribute>(objectType, criteria);
+              }
+              else
+              {
+                if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.EditObject, obj))
+                  throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
+                    "save",
+                    objectType.Name));
+                method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<UpdateAttribute>(objectType, criteria);
+              }
+            }
+            else
+            {
+              method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<UpdateAttribute>(objectType, criteria);
+            }
+          }
+          proxy = GetDataPortalProxy(objectType, method.RunLocal());
+        }
+#endif
 
         dpContext =
           new Server.DataPortalContext(GetPrincipal(), proxy.IsServerRemote);
@@ -654,8 +669,7 @@ namespace Csla
           {
             // when using local data portal, automatically
             // clone original object before saving
-            ICloneable cloneable = obj as ICloneable;
-            if (cloneable != null)
+            if (obj is ICloneable cloneable)
               obj = (T)cloneable.Clone();
           }
           result = await proxy.Update(obj, dpContext, isSync);
@@ -664,8 +678,7 @@ namespace Csla
         {
           if (ex.InnerExceptions.Count > 0)
           {
-            var dpe = ex.InnerExceptions[0] as Server.DataPortalException;
-            if (dpe != null)
+            if (ex.InnerExceptions[0] is Server.DataPortalException dpe)
               HandleUpdateDataPortalException(dpe, isSync, proxy);
           }
           throw new DataPortalException(
@@ -728,6 +741,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     public event EventHandler<DataPortalResult<T>> UpdateCompleted;
 
     /// <summary>
@@ -751,6 +765,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     protected virtual void OnUpdateCompleted(DataPortalResult<T> e)
     {
       UpdateCompleted?.Invoke(this, e);
@@ -781,6 +796,7 @@ namespace Csla
     /// by the UI to update an object.
     /// </summary>
     /// <param name="obj">Object to update.</param>
+    [Obsolete]
     public void BeginUpdate(T obj)
     {
       BeginUpdate(obj, null);
@@ -792,6 +808,7 @@ namespace Csla
     /// </summary>
     /// <param name="obj">Object to update.</param>
     /// <param name="userState">User state data.</param>
+    [Obsolete]
     public async void BeginUpdate(T obj, object userState)
     {
       try
@@ -830,15 +847,18 @@ namespace Csla
       {
         DataPortal.OnDataPortalInitInvoke(null);
 
-        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.DeleteObject, objectType))
+        if (!Csla.Rules.BusinessRules.HasPermission(Rules.AuthorizationActions.DeleteObject, objectType, Server.DataPortal.GetCriteriaArray(criteria)))
           throw new Csla.Security.SecurityException(string.Format(Resources.UserNotAuthorizedException,
             "delete",
             objectType.Name));
 
+#if NET40
         var method = Server.DataPortalMethodCache.GetDeleteMethod(objectType, criteria);
-
-        DataPortalClient.IDataPortalProxy proxy;
-        proxy = GetDataPortalProxy(objectType, method.RunLocal);
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal);
+#else
+        var method = Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<DeleteAttribute>(objectType, Server.DataPortal.GetCriteriaArray(criteria));
+        var proxy = GetDataPortalProxy(objectType, method.RunLocal());
+#endif
 
         dpContext = new Server.DataPortalContext(GetPrincipal(), proxy.IsServerRemote);
 
@@ -901,6 +921,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     public event EventHandler<DataPortalResult<T>> DeleteCompleted;
 
     /// <summary>
@@ -924,6 +945,7 @@ namespace Csla
     /// event will be raised on a background thread.
     /// </para>
     /// </remarks>
+    [Obsolete]
     protected virtual void OnDeleteCompleted(DataPortalResult<T> e)
     {
       DeleteCompleted?.Invoke(this, e);
@@ -934,9 +956,9 @@ namespace Csla
     /// by the UI to delete an object.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
-    public void Delete(object criteria)
+    public void Delete(params object[] criteria)
     {
-      Delete(typeof(T), criteria);
+      Delete(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria));
     }
 
     internal static void Delete(Type objectType, object criteria)
@@ -964,6 +986,7 @@ namespace Csla
     /// by the UI to delete an object.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
+    [Obsolete]
     public void BeginDelete(object criteria)
     {
       BeginDelete(criteria, null);
@@ -975,6 +998,7 @@ namespace Csla
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
     /// <param name="userState">User state data.</param>
+    [Obsolete]
     public async void BeginDelete(object criteria, object userState)
     {
       try
@@ -1000,20 +1024,22 @@ namespace Csla
     /// by the UI to delete an object.
     /// </summary>
     /// <param name="criteria">Object-specific criteria.</param>
-    public async Task DeleteAsync(object criteria)
+    public async Task DeleteAsync(params object[] criteria)
     {
-      await DoDeleteAsync(typeof(T), criteria, false);
+      await DoDeleteAsync(typeof(T), Server.DataPortal.GetCriteriaFromArray(criteria), false);
     }
 
     /// <summary>
     /// Event indicating an execute operation is complete.
     /// </summary>
+    [Obsolete]
     public event EventHandler<DataPortalResult<T>> ExecuteCompleted;
 
     /// <summary>
     /// Raises the ExecuteCompleted event.
     /// </summary>
     /// <param name="e">Event arguments.</param>
+    [Obsolete]
     protected virtual void OnExecuteCompleted(DataPortalResult<T> e)
     {
       ExecuteCompleted?.Invoke(this, e);
@@ -1034,6 +1060,7 @@ namespace Csla
     /// by the UI to execute a command object.
     /// </summary>
     /// <param name="command">Command object to execute.</param>
+    [Obsolete]
     public void BeginExecute(T command)
     {
       BeginExecute(command, null);
@@ -1045,6 +1072,7 @@ namespace Csla
     /// </summary>
     /// <param name="command">Command object to execute.</param>
     /// <param name="userState">User state data.</param>
+    [Obsolete]
     public async void BeginExecute(T command, object userState)
     {
       try
@@ -1105,4 +1133,14 @@ namespace Csla
       }
     }
   }
+
+#if !NET40
+  internal static class Extensions
+  {
+    internal static bool RunLocal(this System.Reflection.MethodInfo t)
+    {
+      return t.CustomAttributes.Count(a => a.AttributeType.Equals(typeof(RunLocalAttribute))) > 0;
+    }
+  }
+#endif
 }

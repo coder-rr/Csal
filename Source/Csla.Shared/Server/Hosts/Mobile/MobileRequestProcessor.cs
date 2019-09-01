@@ -1,7 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="MobileRequestProcessor.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Object taht processes all the requests from a Silverlight client</summary>
 //-----------------------------------------------------------------------
@@ -91,7 +91,7 @@ namespace Csla.Server.Hosts.Mobile
           if (criteria != null)
             newObject = Csla.DataPortal.Create(businessObjectType, criteria);
           else
-            newObject = Csla.DataPortal.Create(businessObjectType, new EmptyCriteria());
+            newObject = Csla.DataPortal.Create(businessObjectType, EmptyCriteria.Instance);
 #else
           if (criteria != null)
             newObject = await Csla.Reflection.MethodCaller.CallGenericStaticMethodAsync(typeof(Csla.DataPortal), "CreateAsync", new Type[] { businessObjectType }, true, criteria).ConfigureAwait(false);
@@ -178,7 +178,7 @@ namespace Csla.Server.Hosts.Mobile
         {
 #if NET40
           if (criteria == null)
-            newObject = Csla.DataPortal.Fetch(businessObjectType, new EmptyCriteria());
+            newObject = Csla.DataPortal.Fetch(businessObjectType, EmptyCriteria.Instance);
           else
             newObject = Csla.DataPortal.Fetch(businessObjectType, criteria);
 #else

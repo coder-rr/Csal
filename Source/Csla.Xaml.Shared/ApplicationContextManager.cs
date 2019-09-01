@@ -1,7 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="ApplicationContextManager.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Provides consistent context information between the client</summary>
 //-----------------------------------------------------------------------
@@ -13,7 +13,7 @@ namespace Csla.Xaml
   /// <summary>
   /// ApplicationContextManager for WPF applications
   /// </summary>
-  public class ApplicationContextManager : Csla.ApplicationContext.ApplicationContextManager
+  public class ApplicationContextManager : Csla.Core.ApplicationContextManager
   {
     private static IPrincipal _principal = null;
 

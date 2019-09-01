@@ -26,7 +26,7 @@ Contributing
 CSLA .NET is an open source project and we do accept contributions. Information for contributors and developers can be found here:
 
 * [Contribute to CSLA .NET](https://github.com/MarimerLLC/csla/blob/master/CONTRIBUTING.md)
-* [Developer information](Developer-information.md)
+* [Contributors](https://github.com/MarimerLLC/csla/graphs/contributors)
 
 External links
 --------------
@@ -36,5 +36,6 @@ External links
 * [CSLA .NET archive download page](http://www.lhotka.net/cslanet/download.aspx)
 * [Wikipedia page](http://en.wikipedia.org/wiki/CSLA_.NET)
 * [Open Hub](https://www.openhub.net/p/cslanet)
-* [Facebook](https://www.facebook.com/CslaNet) 
+* [LinkedIn](https://www.linkedin.com/groups/99453/)
+* Facebook [Group](https://www.facebook.com/groups/cslanet/) | [Page](https://www.facebook.com/CslaNet) 
 * [StackOverflow](http://stackoverflow.com/tags/csla/info)
