@@ -13,21 +13,128 @@ namespace Csla.Analyzers.Tests.Extensions
   public sealed class ITypeSymbolExtensionsTests
   {
     [TestMethod]
-    public void IsBusinessBaseWhenSymbolIsNull()
+    public async Task IsPrimitiveForNonPrimitiveType()
     {
-      Assert.IsFalse((null as ITypeSymbol).IsBusinessBase());
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsFalse(model.Compilation.GetTypeByMetadataName(typeof(Guid).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForBool()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(bool).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForChar()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(char).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForString()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(string).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForByte()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(byte).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForSByte()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(sbyte).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForInt16()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(short).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForUInt16()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(ushort).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForInt32()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(int).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForUInt32()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(uint).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForInt64()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(long).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForUInt64()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(ulong).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForSingle()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(float).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public async Task IsPrimitiveForDouble()
+    {
+      var (_, model) = await GetRootAndModel(string.Empty);
+      Assert.IsTrue(model.Compilation.GetTypeByMetadataName(typeof(double).FullName).IsPrimitive());
+    }
+
+    [TestMethod]
+    public void IsBusinessBaseWhenSymbolIsNull() => Assert.IsFalse((null as ITypeSymbol).IsBusinessBase());
+
+    [TestMethod]
+    public async Task IsObjectFactoryForNotObjectFactoryType()
+    {
+      var code = "public class A { }";
+      Assert.IsFalse((await GetTypeSymbolAsync(code, "A")).IsObjectFactory());
+    }
+
+    [TestMethod]
+    public async Task IsObjectFactoryForObjectFactoryType()
+    {
+      var code = 
+@"using Csla.Server;
+
+public class A : ObjectFactory { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsObjectFactory());
     }
 
     [TestMethod]
     public async Task IsIPropertyInfoWhenSymbolDoesNotDeriveFromIPropertyInfo()
     {
-      var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsIPropertyInfoWhenSymbolDoesNotDeriveFromIPropertyInfo { }
-}";
-      Assert.IsFalse((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsIPropertyInfoWhenSymbolDoesNotDeriveFromIPropertyInfo))).IsIPropertyInfo());
+      var code = "public class A { }";
+      Assert.IsFalse((await GetTypeSymbolAsync(code, "A")).IsIPropertyInfo());
     }
 
     [TestMethod]
@@ -38,231 +145,120 @@ namespace Csla.Analyzers.Tests.Extensions
 using Csla.Core;
 using Csla.Core.FieldManager;
 
-namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
+public class A
+  : IPropertyInfo
 {
-  public class IsIPropertyInfoWhenSymbolDerivesFromIPropertyInfo
-    : IPropertyInfo
+  public object DefaultValue
   {
-    public object DefaultValue
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public string FriendlyName
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public int Index
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-
-      set
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public string Name
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public RelationshipTypes RelationshipType
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public Type Type
-    {
-      get
-      {
-        throw new NotImplementedException();
-      }
-    }
-
-    public IFieldData NewFieldData(string name)
-    {
-      throw new NotImplementedException();
-    }
+    get => throw new NotImplementedException();
   }
+
+  public string FriendlyName
+  {
+    get => throw new NotImplementedException();
+  }
+
+  public int Index
+  {
+    get => throw new NotImplementedException();
+    set => throw new NotImplementedException();
+  }
+
+  public string Name
+  {
+    get => throw new NotImplementedException();
+  }
+
+  public RelationshipTypes RelationshipType
+  {
+    get => throw new NotImplementedException();
+  }
+
+  public Type Type
+  {
+    get => throw new NotImplementedException();
+  }
+
+  public IFieldData NewFieldData(string name) =>
+    throw new NotImplementedException();
 }";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsIPropertyInfoWhenSymbolDerivesFromIPropertyInfo))).IsIPropertyInfo());
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsIPropertyInfo());
     }
 
     [TestMethod]
     public async Task IsBusinessBaseWhenSymbolIsNotABusinessBase()
     {
-      var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsBusinessBaseWhenSymbolIsNotABusinessBase { }
-}";
-      Assert.IsFalse((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsBusinessBaseWhenSymbolIsNotABusinessBase))).IsBusinessBase());
+      var code = 
+@"using Csla;
+
+public class A { }";
+      Assert.IsFalse((await GetTypeSymbolAsync(code, "A")).IsBusinessBase());
     }
 
     [TestMethod]
     public async Task IsBusinessBaseWhenSymbolIsABusinessBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsBusinessBaseWhenSymbolIsABusinessBase
-    : BusinessBase<IsBusinessBaseWhenSymbolIsABusinessBase> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsBusinessBaseWhenSymbolIsABusinessBase))).IsBusinessBase());
+@"using Csla;
+
+public class A : BusinessBase<A> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsBusinessBase());
     }
 
     [TestMethod]
     public async Task IsEditableStereotypeWhenSymbolIsABusinessBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsEditableStereotypeWhenSymbolIsABusinessBase
-    : BusinessBase<IsEditableStereotypeWhenSymbolIsABusinessBase> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsEditableStereotypeWhenSymbolIsABusinessBase))).IsEditableStereotype());
+@"using Csla;
+
+public class A : BusinessBase<A> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsEditableStereotype());
     }
 
     [TestMethod]
     public async Task IsEditableStereotypeWhenSymbolIsABusinessListBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsEditableStereotypeWhenSymbolIsABusinessListBaseBO
-    : BusinessBase<IsEditableStereotypeWhenSymbolIsABusinessListBaseBO>
-  { }
+@"using Csla;
 
-  public class IsEditableStereotypeWhenSymbolIsABusinessListBase
-    : BusinessListBase<IsEditableStereotypeWhenSymbolIsABusinessListBase, IsEditableStereotypeWhenSymbolIsABusinessListBaseBO> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsEditableStereotypeWhenSymbolIsABusinessListBase))).IsEditableStereotype());
+public class ABO : BusinessBase<ABO> { }
+
+public class A : BusinessListBase<A, ABO> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsEditableStereotype());
     }
 
     [TestMethod]
     public async Task IsEditableStereotypeWhenSymbolIsADynamicListBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsEditableStereotypeWhenSymbolIsADynamicListBaseBO
-    : BusinessBase<IsEditableStereotypeWhenSymbolIsADynamicListBaseBO>
-  { }
+@"using Csla;
 
-  public class IsEditableStereotypeWhenSymbolIsADynamicListBase
-    : DynamicListBase<IsEditableStereotypeWhenSymbolIsADynamicListBaseBO> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code, 
-        nameof(ITypeSymbolExtensionsTests.IsEditableStereotypeWhenSymbolIsADynamicListBase))).IsEditableStereotype());
+public class ABO : BusinessBase<ABO> { }
+
+public class A : DynamicListBase<ABO> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsEditableStereotype());
     }
 
     [TestMethod]
     public async Task IsEditableStereotypeWhenSymbolIsABusinessBindingListBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsEditableStereotypeWhenSymbolIsABusinessBindingListBaseBO
-    : BusinessBase<IsEditableStereotypeWhenSymbolIsABusinessBindingListBaseBO>
-  { }
+@"using Csla;
 
-  public class IsEditableStereotypeWhenSymbolIsABusinessBindingListBase
-    : BusinessBindingListBase<IsEditableStereotypeWhenSymbolIsABusinessBindingListBase, IsEditableStereotypeWhenSymbolIsABusinessBindingListBaseBO> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsEditableStereotypeWhenSymbolIsABusinessBindingListBase))).IsEditableStereotype());
+public class ABO : BusinessBase<ABO> { }
+
+public class A : BusinessBindingListBase<A, ABO> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsEditableStereotype());
     }
 
     [TestMethod]
     public async Task IsEditableStereotypeWhenSymbolIsACommandBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsEditableStereotypeWhenSymbolIsACommandBase
-    : CommandBase<IsEditableStereotypeWhenSymbolIsACommandBase> { }
-}";
-      Assert.IsFalse((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsEditableStereotypeWhenSymbolIsACommandBase))).IsEditableStereotype());
-    }
+@"using Csla;
 
-    [TestMethod]
-    public void IsSerializableWhenSymbolIsNull()
-    {
-      Assert.IsFalse((null as ITypeSymbol).IsSerializable());
-    }
-
-    [TestMethod]
-    public async Task IsSerializableWhenSymbolIsNotSerializable()
-    {
-      var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsSerializableWhenSymbolIsNotSerializable { }
-}";
-      Assert.IsFalse((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsSerializableWhenSymbolIsNotSerializable))).IsSerializable());
-    }
-
-    [TestMethod]
-    public async Task IsSerializableWhenSymbolHasSerializableAttribute()
-    {
-      var code =
-@"using System;
-
-namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  [Serializable]
-  public class IsSerializableWhenSymbolHasSerializableAttribute { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsSerializableWhenSymbolHasSerializableAttribute))).IsSerializable());
-    }
-
-    [TestMethod]
-    public async Task IsSerializableWhenSymbolIsEnum()
-    {
-      var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public enum IsSerializableWhenSymbolIsEnum { }
-}";
-      Assert.IsTrue((await this.GetEnumSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsSerializableWhenSymbolIsEnum))).IsSerializable());
-    }
-
-    [TestMethod]
-    public async Task IsSerializableWhenSymbolIsDelegate()
-    {
-      var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public delegate int IsSerializableWhenSymbolIsDelegate();
-}";
-      Assert.IsTrue((await this.GetDelegateSymbolAsync(code, 
-        nameof(ITypeSymbolExtensionsTests.IsSerializableWhenSymbolIsDelegate))).IsSerializable());
+public class A : CommandBase<A> { }";
+      Assert.IsFalse((await GetTypeSymbolAsync(code, "A")).IsEditableStereotype());
     }
 
     [TestMethod]
@@ -275,12 +271,8 @@ namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
     public async Task IsStereotypeWhenSymbolIsNotAStereotype()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsStereotypeWhenSymbolIsNotAStereotype { }
-}";
-      Assert.IsFalse((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsStereotypeWhenSymbolIsNotAStereotype))).IsStereotype());
+@"public class A { }";
+      Assert.IsFalse((await GetTypeSymbolAsync(code, "A")).IsStereotype());
     }
 
     [TestMethod]
@@ -289,16 +281,12 @@ namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
       var code =
 @"using Csla.Core;
 
-namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
+public class A
+  : IBusinessObject
 {
-  public class IsStereotypeWhenSymbolIsStereotypeViaIBusinessObject
-    : IBusinessObject
-  {
-    public int Identity => default(int);
-  }
+  public int Identity => default(int);
 }";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsStereotypeWhenSymbolIsStereotypeViaIBusinessObject))).IsStereotype());
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsStereotype());
     }
 
     [TestMethod]
@@ -307,101 +295,108 @@ namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
       var code =
 @"using Csla;
 
-namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsStereotypeWhenSymbolIsStereotypeViaBusinessBase
-    : BusinessBase<IsStereotypeWhenSymbolIsStereotypeViaBusinessBase> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsStereotypeWhenSymbolIsStereotypeViaBusinessBase))).IsStereotype());
+public class A : BusinessBase<A> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsStereotype());
     }
 
     [TestMethod]
     public async Task IsStereotypeWhenSymbolIsDynamicListBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsStereotypeWhenSymbolIsDynamicListBaseBO
-    : BusinessBase<IsStereotypeWhenSymbolIsDynamicListBaseBO>
-  { }
+@"using Csla;
 
-  public class IsStereotypeWhenSymbolIsDynamicListBase
-    : DynamicListBase<IsStereotypeWhenSymbolIsDynamicListBaseBO> { }
-}";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsStereotypeWhenSymbolIsDynamicListBase))).IsStereotype());
+public class ABO : BusinessBase<ABO> { }
+
+public class A : DynamicListBase<ABO> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsStereotype());
     }
 
     [TestMethod]
     public async Task IsStereotypeWhenSymbolIsStereotypeViaCommandBase()
     {
       var code =
-@"namespace Csla.Analyzers.Tests.Targets.ITypeSymbolExtensionsTests
-{
-  public class IsStereotypeWhenSymbolIsStereotypeViaCommandBase
-    : CommandBase<IsStereotypeWhenSymbolIsStereotypeViaCommandBase> { }
+@"using Csla;
+
+public class A : CommandBase<A> { }";
+      Assert.IsTrue((await GetTypeSymbolAsync(code, "A")).IsStereotype());
+    }
+
+    [TestMethod]
+    public async Task IsRunLocalAttribute()
+    {
+      var code =
+@"using Csla;
+
+public class A : BusinessBase<A> 
+{ 
+  [RunLocal]
+  private void B() { }
 }";
-      Assert.IsTrue((await this.GetTypeSymbolAsync(code,
-        nameof(ITypeSymbolExtensionsTests.IsStereotypeWhenSymbolIsStereotypeViaCommandBase))).IsStereotype());
+      Assert.IsTrue((await GetAttributeTypeSymbolAsync(code, "B")).IsRunLocalAttribute());
+    }
+
+    [TestMethod]
+    public async Task IsArgumentInjectableWithAttribute()
+    {
+      var code =
+@"using Csla;
+
+public class A
+{ 
+  private void B([Inject] int b) { }
+}";
+      Assert.IsTrue((await GetArgumentAttributeTypeSymbolAsync(code, "B")).IsInjectable());
+    }
+
+    [TestMethod]
+    public async Task IsArgumentInjectableWithoutAttribute()
+    {
+      var code =
+@"using System;
+
+public class CAttribute : Attribute { }
+
+public class A
+{ 
+  private void B([C] int b) { }
+}";
+      Assert.IsFalse((await GetArgumentAttributeTypeSymbolAsync(code, "B")).IsInjectable());
+    }
+
+    private async Task<ITypeSymbol> GetArgumentAttributeTypeSymbolAsync(string code, string methodName)
+    {
+      var (root, model) = await GetRootAndModel(code);
+      var methodSymbol = model.GetDeclaredSymbol(
+        root.DescendantNodes().OfType<MethodDeclarationSyntax>().First(_ => _.Identifier.Text == methodName));
+      return methodSymbol.Parameters[0].GetAttributes().First().AttributeClass;
+    }
+
+    private async Task<ITypeSymbol> GetAttributeTypeSymbolAsync(string code, string methodName)
+    {
+      var (root, model) = await GetRootAndModel(code);
+      var methodSymbol = model.GetDeclaredSymbol(
+        root.DescendantNodes().OfType<MethodDeclarationSyntax>().First(_ => _.Identifier.Text == methodName));
+      return methodSymbol.GetAttributes().First().AttributeClass;
     }
 
     private async Task<ITypeSymbol> GetTypeSymbolAsync(string code, string name)
     {
-      var (root, model) = await this.GetRootAndModel(code, name);
-
-      foreach (var typeNode in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
-      {
-        if (typeNode.Identifier.ValueText == name)
-        {
-          return model.GetDeclaredSymbol(typeNode);
-        }
-      }
-
-      return null;
+      var (root, model) = await GetRootAndModel(code);
+      return model.GetDeclaredSymbol(
+        root.DescendantNodes().OfType<TypeDeclarationSyntax>().First(_ => _.Identifier.Text == name));
     }
 
-    private async Task<ITypeSymbol> GetEnumSymbolAsync(string code, string name)
-    {
-      var (root, model) = await this.GetRootAndModel(code, name);
-
-      foreach (var enumNode in root.DescendantNodes().OfType<EnumDeclarationSyntax>())
-      {
-        if (enumNode.Identifier.ValueText == name)
-        {
-          return model.GetDeclaredSymbol(enumNode);
-        }
-      }
-
-      return null;
-    }
-
-    private async Task<ITypeSymbol> GetDelegateSymbolAsync(string code, string name)
-    {
-      var (root, model) = await this.GetRootAndModel(code, name);
-
-      foreach (var delegateNode in root.DescendantNodes().OfType<DelegateDeclarationSyntax>())
-      {
-        if (delegateNode.Identifier.ValueText == name)
-        {
-          return model.GetDeclaredSymbol(delegateNode);
-        }
-      }
-
-      return null;
-    }
-
-    private async Task<(SyntaxNode, SemanticModel)> GetRootAndModel(string code, string name)
+    private async Task<(SyntaxNode, SemanticModel)> GetRootAndModel(string code)
     {
       var tree = CSharpSyntaxTree.ParseText(code);
 
       var compilation = CSharpCompilation.Create(Guid.NewGuid().ToString("N"),
         syntaxTrees: new[] { tree },
-        references: new[]
+        references: AssemblyReferences.GetMetadataReferences(new[]
         {
-          MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-          MetadataReference.CreateFromFile(typeof(BusinessBase<>).Assembly.Location)
-        });
+          typeof(object).Assembly,
+          typeof(BusinessBase<>).Assembly
+        }));
 
       var model = compilation.GetSemanticModel(tree);
       var root = await tree.GetRootAsync().ConfigureAwait(false);

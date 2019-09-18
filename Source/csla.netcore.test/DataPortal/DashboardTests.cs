@@ -1,7 +1,7 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="DashboardTests.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>no summary</summary>
 //-----------------------------------------------------------------------
@@ -123,27 +123,32 @@ namespace csla.netcore.test.DataPortal
       set { SetProperty(IdProperty, value); }
     }
 
+    [Fetch]
     private void DataPortal_Fetch(int id)
     {
       // TODO: load values into object
       System.Threading.Thread.Sleep(10);
     }
 
+    [Insert]
     protected override void DataPortal_Insert()
     {
       // TODO: insert object's data
     }
 
+    [Update]
     protected override void DataPortal_Update()
     {
       // TODO: update object's data
     }
 
+    [DeleteSelf]
     protected override void DataPortal_DeleteSelf()
     {
       DataPortal_Delete(ReadProperty(IdProperty));
     }
 
+    [Delete]
     private void DataPortal_Delete(int id)
     {
       // TODO: delete object's data

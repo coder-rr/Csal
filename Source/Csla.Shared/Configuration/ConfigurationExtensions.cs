@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------
 // <copyright file="ConfigurationExtensions.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Implement extension methods for .NET Core configuration</summary>
 //-----------------------------------------------------------------------
@@ -17,13 +17,13 @@ namespace Csla.Configuration
   public static class ConfigurationExtensions
   {
     /// <summary>
-    /// Add CSLA .NET services for use by the application
-    /// and enable CSLA .NET configuration.
+    /// Add CSLA .NET services for use by the application.
     /// </summary>
-    /// <param name="services">IServiceCollection object</param>
+    /// <param name="services">ServiceCollection object</param>
     public static ICslaBuilder AddCsla(this IServiceCollection services)
     {
-      services.AddSingleton<IDataPortalFactory, DataPortalFactory>();
+      ApplicationContext.SetServiceCollection(services);
+      services.AddTransient(typeof(IDataPortal<>), typeof(DataPortal<>));
       return new CslaBuilder();
     }
 

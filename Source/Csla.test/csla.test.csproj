@@ -50,6 +50,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Extensions.DependencyInjection, Version=2.1.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.2.1.1\lib\net461\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=2.2.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.2.2.0\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="PresentationCore" />
@@ -102,7 +108,9 @@
     <Compile Include="AppContext\SimpleRoot.cs" />
     <Compile Include="AppContext\TestContext.cs" />
     <Compile Include="AppDomainTests\AppDomainTests.cs" />
+    <Compile Include="Authorization\AuthRuleExpectsCriteria.cs" />
     <Compile Include="Authorization\AuthTests.cs" />
+    <Compile Include="Authorization\PermissionRootWithCriteria.cs" />
     <Compile Include="Authorization\PermissionsRoot.cs" />
     <Compile Include="Authorization\PermissionsRoot2.cs" />
     <Compile Include="Authorization\PerTypeAuthClasses.cs" />
@@ -210,6 +218,11 @@
     <Compile Include="EditableRootList\EditableRootListTests.cs" />
     <Compile Include="EditableRootList\ERitem.cs" />
     <Compile Include="EditableRootList\ERlist.cs" />
+    <Compile Include="FieldManager\Child.cs" />
+    <Compile Include="FieldManager\ChildList.cs" />
+    <Compile Include="FieldManager\ChildUpdateTests.cs" />
+    <Compile Include="FieldManager\Root.cs" />
+    <Compile Include="FieldManager\RootUpdateAllChildren.cs" />
     <Compile Include="GraphMerge\GraphMergerTests.cs" />
     <Compile Include="GraphMerge\IdentityTests.cs" />
     <Compile Include="GraphMerge\TestClasses.cs" />
@@ -387,6 +400,7 @@
       <LastGenOutput>TestLinqToSqlContext.designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
+    <None Include="packages.config" />
     <None Include="Properties\DataSources\Csla.Test.Data.DataPortalTestDatabaseEntities.datasource" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

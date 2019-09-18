@@ -32,13 +32,10 @@ namespace Csla.Analyzers.Tests
 @"using Csla;
 using System;
 
-namespace Csla.Analyzers.Tests.Targets.IsBusinessObjectSerializableMakeSerializableCodeFixTests
+public class A : BusinessBase<A>
 {
-  public class VerifyGetFixesWhenUsingSystemExists
-    : BusinessBase<VerifyGetFixesWhenUsingSystemExists>
-  {
-    public void DataPortal_Fetch() { }
-  }
+  [Fetch]
+  public void Fetch() { }
 }";
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
@@ -57,7 +54,7 @@ namespace Csla.Analyzers.Tests.Targets.IsBusinessObjectSerializableMakeSerializa
       Assert.AreEqual(1, actions.Count, nameof(actions.Count));
 
       await TestHelpers.VerifyActionAsync(actions,
-        IsBusinessObjectSerializableMakeSerializableCodeFixConstants.AddSerializableAndUsingDescription, document,
+        IsBusinessObjectSerializableMakeSerializableCodeFixConstants.AddSerializableDescription, document,
         tree, new[] { "[Serializable]" });
     }
 
@@ -67,13 +64,10 @@ namespace Csla.Analyzers.Tests.Targets.IsBusinessObjectSerializableMakeSerializa
       var code =
 @"using Csla;
 
-namespace Csla.Analyzers.Tests.Targets.IsBusinessObjectSerializableMakeSerializableCodeFixTests
+public class A : BusinessBase<A>
 {
-  public class VerifyGetFixesWhenUsingSystemDoesNotExists
-    : BusinessBase<VerifyGetFixesWhenUsingSystemDoesNotExists>
-  {
-    public void DataPortal_Fetch() { }
-  }
+  [Fetch]
+  public void Fetch() { }
 }";
       var document = TestHelpers.Create(code);
       var tree = await document.GetSyntaxTreeAsync();
