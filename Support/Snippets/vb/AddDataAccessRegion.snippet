@@ -29,11 +29,12 @@
           <Function />
         </Literal>
       </Declarations>
-      <Code Language="VB" Delimiter="$"><![CDATA[
+      <Code Language="VB" Delimiter="$">
+    <![CDATA[
 <Create> _
 Private Sub Create()
   ' TODO: initialize object values
-  Base.DataPortal_Create()
+  BusinessRules.CheckRules()
 End Sub
 
 <Fetch> _
@@ -57,7 +58,7 @@ Private Sub DeleteSelf()
 End Sub
 
 <Delete> _
-Private Sub Delete(ByVal id As $IdType$)
+Private Shadows Sub Delete(ByVal id As $IdType$)
   ' TODO: use DAL to delete object's data
 End Sub
 ]]></Code>
