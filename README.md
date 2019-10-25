@@ -4,7 +4,6 @@ CSLA .NET
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=MarimerLLC/csla)](https://dependabot.com)
 [![Join the chat at https://gitter.im/MarimerLLC/cslaforum](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MarimerLLC/cslaforum?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![NuGet](https://img.shields.io/nuget/v/CSLA-Core.svg)](https://www.nuget.org/packages/CSLA-Core)
 [![NuGet](https://img.shields.io/nuget/v/Csla.svg)](https://www.nuget.org/packages/Csla)
 
 ![](https://raw.github.com/MarimerLLC/csla/master/Support/Logos/csla%20win8_mid.png)
@@ -20,6 +19,12 @@ More information about CSLA .NET is available from the following sources:
 * [Getting started with CSLA .NET](https://github.com/MarimerLLC/csla/blob/master/docs/Getting-started.md)
 * [CSLA .NET forum](https://github.com/marimerllc/cslaforum) 
 * [CSLA .NET training videos and ebooks](https://github.com/MarimerLLC/csla/blob/master/docs/Books-and-videos.md)
+
+Patron
+------
+CSLA .NET would not exist in its current form without generous support from
+
+[![Magenic](docs/images/magenic-logo.png)](https://magenic.com)
 
 License
 -------

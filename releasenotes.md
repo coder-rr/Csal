@@ -1,4 +1,70 @@
-# CSLA .NET version 5.0.0 pre-release
+# CSLA 5 releases
+
+CSLA 5 is a big release with some breaking changes, some major enhancements, and with new support for .NET Core 3 and WebAssembly (Blazor, etc.).
+
+# CSLA .NET version 5.1.0 release
+
+Enhancements primarily related to Blazor support, along with a few other good changes/fixes.
+
+## Change List
+
+[Changes in this release](https://github.com/MarimerLLC/csla/issues?q=is%3Aissue+is%3Aclosed+project%3AMarimerLLC%2Fcsla%2F12).
+
+Highlights:
+
+### Blazor
+
+* [#1371](https://github.com/MarimerLLC/csla/issues/1371) Ensure `Csla.Blazor` works on server-side code too
+* [#1309](https://github.com/MarimerLLC/csla/issues/1309) Add `CslaValidator` component for Blazor
+* [#1295](https://github.com/MarimerLLC/csla/issues/1295) Add severity support to `CslaValidator` component
+
+### Razor and MVC
+
+* [#1368](https://github.com/MarimerLLC/csla/issues/1368) Add netcoreapp3.0 project for ASP.NET Core 3
+* [#1367](https://github.com/MarimerLLC/csla/issues/1367) Add Razor tag helpers for validation (error/warn/info) text
+
+### Analyzers
+
+* [#1348](https://github.com/MarimerLLC/csla/issues/1348) Analyzer: Operation attribute usage
+
+### Examples
+
+* [#1358](https://github.com/MarimerLLC/csla/issues/1358) Create `XamarinExample` sample app
+* [#1364](https://github.com/MarimerLLC/csla/issues/1364) Create `RazorPagesExample` sample app
+
+### Bug fixes
+
+* [#1369](https://github.com/MarimerLLC/csla/issues/1369) Fix issues with `ApplicationContext` in netcore 3
+* [#1360](https://github.com/MarimerLLC/csla/issues/1360) Fix issue with `DbContext` in .NET Core 3
+
+### Dependabot and NuGet dependencies
+
+* Bump Microsoft.Data.SqlClient from 1.0.19249.1 to 1.0.19269.1
+* Bump Xamarin.Forms from 4.2.0.815419 to 4.2.0.848062
+* Bump Google.Protobuf from 3.9.2 to 3.10.0
+* Bump Microsoft.CodeAnalysis.Analyzers from 2.9.4 to 2.9.6
+
+## Contributors
+
+* [@dazinator](https://github.com/dazinator) lots of help with Blazor implementation
+* [@TheCakeMonster](https://github.com/TheCakeMonster) lots of help with Blazor implementation
+* [@JasonBock](https://github.com/JasonBock) lots of work with the analyzers
+* [@skeeler88](https://github.com/skeeler88) bug fixes
+
+---
+
+# CSLA .NET version 5.0.1 release
+
+Bug fix release over 5.0.0.
+
+## Change List
+
+* [#1336](https://github.com/marimerllc/csla/issues/1336) Target `Microsoft.Extensions.*` 2.x versions, not 3.0 versions
+* [#1337](https://github.com/marimerllc/csla/issues/1337) Fix issue with WPF depedendencies in .NET Core 3
+
+---
+
+# CSLA .NET version 5.0.0 release
 
 CSLA 5 is a big release with some breaking changes, some major enhancements, and with new support for .NET Core 3 and WebAssembly (Blazor, etc.).
 
@@ -16,11 +82,16 @@ Some changes were made to address common issues people face using CSLA. I've tri
 
 ### Dependabot and NuGet dependencies
 
+* Bump appropriate dependencies for .NET Core 3.0
 * Bump Microsoft.AspNetCore from 2.0.3 to 2.2.0 in /Source
-* Bump Xamarin.Forms from 3.4.0.1008975 to 4.1.0.778463 in /Source
+* Bump Xamarin.Forms from 3.4.0.1008975 to 4.1.0.815419 in /Source
+* Add  Microsoft.EntityFrameworkCore from 3.0.0 in /Source
 * Bump Microsoft.EntityFrameworkCore from 2.2.0 to 2.2.6 in /Source
 * Bump Microsoft.CodeAnalysis.Analyzers from 2.6.3 to 2.9.4 in /Source
 * Bump Microsoft.NETCore.UniversalWindowsPlatform to 6.2.9 in /Source
+* Bump System.Data.SqlClient to 4.7.0 in /Source
+* Bump System.Principal.Windows from 4.5.1 to 4.6.0 in /Source
+* Bump System.Security.AccessControl from 4.5.9 to 4.6.0 in /Source
 
 ### Data Portal
 
@@ -82,6 +153,8 @@ Some changes were made to address common issues people face using CSLA. I've tri
 * [#981](https://github.com/marimerllc/csla/issues/981) Move support for `System.Data.SqlClient` into new `Csla.Data.SqlClient.Fx` package - it is no longer in the core of CSLA 🛑
 
 ### ASP.NET Core
+
+🛑 ASP.NET Core 2.2 projects often rely on the `Microsoft.AspNetCore.App` metapackage. You can not use this metapackage with CSLA 5, because the metapackage prevents the use of .NET Core 3.0 dependencies. The easiest workaround is to switch to the `Microsoft.AspNetCore.All` metapackage, though other options exist. 🛑
 
 * [#905](https://github.com/MarimerLLC/csla/issues/905) Add support for ASP.NET Core MVC validation mechanism
 * [#649](https://github.com/MarimerLLC/csla/issues/649) Implement CSLA permission requirement handler
