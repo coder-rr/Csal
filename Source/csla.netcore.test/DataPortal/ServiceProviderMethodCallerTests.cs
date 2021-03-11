@@ -250,14 +250,13 @@ namespace Csla.Test.DataPortal
     }
 
     [TestMethod]
+    [ExpectedException(typeof(System.Reflection.AmbiguousMatchException))]
     public void Issue2109()
     {
-      var obj = new Issue2109();
-      var method = Csla.Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<FetchAttribute>(obj, new object[] { new string[] { "a" } });
-      Assert.IsNotNull(method, "string[]");
-      var criteria = new Issue2109.MyCriteria();
-      method = Csla.Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<FetchAttribute>(obj, new object[] { criteria });
-      Assert.IsNotNull(method, "ICriteriaBase");
+      var obj = new Issue2109List();
+      _ = Csla.Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<FetchAttribute>(obj, new object[] { new string[] { "a" } });
+      var criteria = new Issue2109List.MyCriteria();
+      _ = Csla.Reflection.ServiceProviderMethodCaller.FindDataPortalMethod<FetchAttribute>(obj, new object[] { criteria });
     }
   }
 
@@ -439,23 +438,24 @@ namespace Csla.Test.DataPortal
   }
 
   [Serializable]
-  public class Issue2109 : BusinessBase<Issue2109>
+  public class Issue2109Info : ReadOnlyBase<Issue2109Info> { }
+
+  [Serializable]
+  public class Issue2109List : ReadOnlyListBase<Issue2109List, Issue2109Info>
   {
-    [Fetch]
-    private void Fetch(ICriteriaBase criteria)
-    {
-    }
-
-    [Fetch]
-    private void Fetch(IEnumerable<string> criteria)
-    {
-    }
-
     public interface ICriteriaBase
-    { }
+    {
+    }
 
     [Serializable]
     public class MyCriteria : ICriteriaBase
+    {
+    }
+
+    private void DataPortal_Fetch(ICriteriaBase criteria)
+    {
+    }
+    private void DataPortal_Fetch(IEnumerable<string> criteria)
     {
     }
   }
